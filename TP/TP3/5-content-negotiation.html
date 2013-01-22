@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; }
+code > span.dt { color: #204a87; }
+code > span.dv { color: #0000cf; }
+code > span.bn { color: #0000cf; }
+code > span.fl { color: #0000cf; }
+code > span.ch { color: #4e9a06; }
+code > span.st { color: #4e9a06; }
+code > span.co { color: #8f5902; font-style: italic; }
+code > span.ot { color: #8f5902; }
+code > span.al { color: #ef2929; }
+code > span.fu { color: #000000; }
+code > span.er { font-weight: bold; }
+  </style>
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+<h1 id="content-negotiation">Content Negotiation</h1>
+<p><strong>Important:</strong> Before starting this practical, a working <em>µFramework</em> implementation is required.</p>
+<p>The goal of this practical is to implement a simple content negotiation layer in your <code>µFramework</code>, and to make your application a <strong>true</strong> RESTful API.</p>
+<p>By the end of this session your application will serve resources in:</p>
+<ul>
+<li><code>HTML</code> using a template;</li>
+<li><code>JSON</code> encoded data.</li>
+</ul>
+<p>The HTML part has been done in the previous practical, so you will reuse the work you did before.</p>
+<p>The JSON part is what you have to do now. This part is the <strong>API</strong> part of your application. So you have to follow the REST conventions such as proper status codes, and so on.</p>
+<p>Your implementation will also accept parameters encoded in:</p>
+<ul>
+<li><code>application/form-url-encoded</code>;</li>
+<li><code>application/json</code>.</li>
+</ul>
+<p>The <code>application/form-url-encoded</code> is used when you submit a HTML form.</p>
+<p>That's what we call a <strong>REST API</strong>.</p>
+<h2 id="theory">Theory</h2>
+<p>Content negotiation is part of the <code>HTTP</code> protocol, used to serve a media in the best format for a client.</p>
+<p><a href="http://pretty-rfc.herokuapp.com/RFC2616">RFC 2616: HTTP/1.1</a> - <a href="http://pretty-rfc.herokuapp.com/RFC2295">RFC 2295: content negotiation</a>.</p>
+<p>Content negotiation means that a single resource can be presented in different ways, depending on the client. To achieve this goal, <code>HTTP headers</code> are used by a client to present accepted formats. Based on this <code>Accept</code> header, the server can guess the best content to deliver.</p>
+<p>Here is an example:</p>
+<pre><code>#Client
+GET /locations/1 HTTP/1.1
+Host: www.example.org
+Accept: text/html; q=1.0, text/*; q=0.8, image/gif; q=0.6, image/jpeg; q=0.6, image/*; q=0.5, */*; q=0.1
+
+#Server
+HTTP/1.1 200 OK
+Date: Mon, 23 May 2005 22:38:34 GMT
+Server: Apache/1.3.3.7 (Unix) (Red-Hat/Linux)
+Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT
+Accept-Ranges:  none
+Content-Length: 438
+Connection: close
+Content-Type: text/html; charset=UTF-8
+
+&lt;!DOCtYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;h1&gt;New York&lt;/h1&gt;
+    &lt;/body&gt;
+&lt;/html&gt;</code></pre>
+<p>Same request performed by another client:</p>
+<pre><code>#Client
+GET /locations/1 HTTP/1.1
+Host: www.example.org
+Accept: application/json; q=1.0, text/*; q=0.8
+
+#Server
+HTTP/1.1 200 OK
+Date: Mon, 23 May 2005 22:38:34 GMT
+Server: Apache/1.3.3.7 (Unix) (Red-Hat/Linux)
+Last-Modified: Wed, 08 Jan 2003 23:11:55 GMT
+Accept-Ranges:  none
+Content-Length: 438
+Connection: close
+Content-Type: application/json; charset=UTF-8
+
+{&quot;id&quot;:&quot;1&quot;,&quot;name&quot;:&quot;New York&quot;}</code></pre>
+<h2 id="content-negotiation-for-resources-representation">Content Negotiation For Resources Representation</h2>
+<h3 id="requirements">Requirements</h3>
+<p>First, grab a piece of paper and write an example of the <code>GET /locations/1</code> response in JSON and HTML, and call for validation.</p>
+<h3 id="conception">Conception</h3>
+<h4 id="guessing-the-best-format-to-return">Guessing The Best Format To Return</h4>
+<p>It's Request's responsability to resolve the best format to serve, so we need a <code>guessBestFormat()</code> method in this class.</p>
+<p><a href="https://github.com/willdurand/negotiation">Negotiation</a> will help you to get the best format from headers by handling content negotiation. The <code>Accept</code> header <strong>could</strong> be found in <code>$_SERVER['HTTP_ACCEPT']</code>.</p>
+<p>Thanks to this new method, it is now possible to render different content based on the best fit.</p>
+<h4 id="formatting-your-data-the-right-way">Formatting Your Data The Right Way</h4>
+<p>HTML rendering is achieved through your template engine. Rendering your data in other formats is called <em>serialization</em>. Serialization is the process of converting a data structure or object state into a format that can be stored.</p>
+<p>The serialization is handled by a Serializer. This serializer can be as simple as the <code>json_encode()</code> function or you can use the <a href="http://symfony.com/doc/current/components/serializer.html">Serializer Component</a>.</p>
+<h4 id="introducing-a-response-object">Introducing A Response Object</h4>
+<p>To fit the HTTP protocol, every response should contain at least:</p>
+<ul>
+<li>a Content-Type header to describe the content;</li>
+<li>a status code to give feedback on what happened;</li>
+<li>the content or body of the response.</li>
+</ul>
+<p>That makes a lot of things to handle, it cannot all fit in the <code>App</code> class. A <code>Response</code> class will be in charge of the response configuration.</p>
+<h3 id="implementation">Implementation</h3>
+<p>You will use <a href="http://getcomposer.org">Composer</a> to manage your project, and its libraries.</p>
+<h4 id="create-a-composer.json-file">Create a <code>composer.json</code> file</h4>
+<p>In your project, create a <code>composer.json</code> file with the following content:</p>
+<pre class="sourceCode json"><code class="sourceCode json">{
+    <span class="dt">&quot;require&quot;</span>: {
+        <span class="dt">&quot;symfony/serializer&quot;</span>: <span class="st">&quot;~2.1&quot;</span>,
+        <span class="dt">&quot;willdurand/negotiation&quot;</span>: <span class="st">&quot;1.0.*@dev&quot;</span>
+    },
+    <span class="dt">&quot;autoload&quot;</span>: {
+        <span class="dt">&quot;psr-0&quot;</span>: { <span class="dt">&quot;&quot;</span>: <span class="st">&quot;src/&quot;</span> }
+    }
+}</code></pre>
+<p>Now, run:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">vagrant@vm-licpro:/var/www/uframework$ composer <span class="kw">install</span></code></pre>
+<p>It will install two libraries in the <code>vendor/</code> folder.</p>
+<p>Run the test suite, does it fail?</p>
+<p>Edit the <code>tests/boostrap.php</code> file, by replacing its content with:</p>
+<pre class="sourceCode php"><code class="sourceCode php">$loader = require __DIR__ . &#39;/../vendor/autoload.php&#39;;
+$loader-&gt;add(&#39;&#39;, __DIR__);</code></pre>
+<p>Can you explain what this snippet does?</p>
+<h4 id="replace-your-autoloader-with-composers-one">Replace Your Autoloader With Composer's One</h4>
+<p>When you run <code>composer install</code>, it also generates an autoloader file in <code>vendor/autoload.php</code>. That one is optimized and probably better than yours. Moreover, it's automatically generated and you don't need to waste your time on that.</p>
+<p>In <code>app/app.php</code>, replace the autoloader with <code>vendor/autoload.php</code>.</p>
+<p>You can safely delete the <code>autoload.php</code> file you wrote in the previous practical.</p>
+<h4 id="update-your-request-class">Update Your Request Class</h4>
+<p>Create the <code>guessBestFormat()</code> method as specified. Rely on the Negotiation library if you think it's worth using it ;-)</p>
+<p>The <code>Accept</code> header can be found in <code>$_SERVER['HTTP_ACCEPT']</code>.</p>
+<h4 id="add-a-response-class">Add A Response Class</h4>
+<p>The following <code>Response</code> class will be used:</p>
+<pre class="sourceCode php"><code class="sourceCode php"><span class="kw">&lt;?php</span>
+
+<span class="kw">namespace</span> Http<span class="ot">;</span>
+
+<span class="kw">class</span> Response
+{
+    <span class="kw">private</span> <span class="kw">$content</span><span class="ot">;</span>
+
+    <span class="kw">private</span> <span class="kw">$statusCode</span><span class="ot">;</span>
+
+    <span class="kw">private</span> <span class="kw">$headers</span><span class="ot">;</span>
+
+    <span class="kw">public</span> <span class="kw">function</span> <span class="fu">__construct</span><span class="ot">(</span><span class="kw">$content</span><span class="ot">,</span> <span class="kw">$statusCode</span> = <span class="dv">200</span><span class="ot">,</span> <span class="fu">array</span> <span class="kw">$headers</span> = <span class="fu">array</span><span class="ot">())</span>
+    {
+        <span class="kw">$this</span>-&gt;content    = <span class="kw">$content</span><span class="ot">;</span>
+        <span class="kw">$this</span>-&gt;statusCode = <span class="kw">$statusCode</span><span class="ot">;</span>
+        <span class="kw">$this</span>-&gt;headers    = <span class="fu">array_merge</span><span class="ot">(</span><span class="st">&#39;Content-Type&#39;</span> =&gt; <span class="st">&#39;text/html&#39;</span><span class="ot">),</span> <span class="kw">$headers</span><span class="ot">);</span>
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> getStatusCode<span class="ot">()</span>
+    {
+        <span class="kw">return</span> <span class="kw">$this</span>-&gt;statusCode<span class="ot">;</span>
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> getContent<span class="ot">()</span>
+    {
+        <span class="kw">return</span> <span class="kw">$this</span>-&gt;content<span class="ot">;</span>
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> sendHeaders<span class="ot">()</span>
+    {
+        http_response_code<span class="ot">(</span><span class="kw">$this</span>-&gt;statusCode<span class="ot">);</span>
+
+        <span class="kw">foreach</span> <span class="ot">(</span><span class="kw">$this</span>-&gt;headers <span class="kw">as</span> <span class="kw">$name</span> =&gt; <span class="kw">$value</span><span class="ot">)</span> {
+            <span class="fu">header</span><span class="ot">(</span><span class="fu">sprintf</span><span class="ot">(</span><span class="st">&#39;%s: %s&#39;</span><span class="ot">,</span> <span class="kw">$name</span><span class="ot">,</span> <span class="kw">$value</span><span class="ot">));</span>
+        }
+    }
+
+    <span class="kw">public</span> <span class="kw">function</span> send<span class="ot">()</span>
+    {
+        <span class="kw">$this</span>-&gt;sendHeaders<span class="ot">();</span>
+
+        <span class="fu">echo</span> <span class="kw">$this</span>-&gt;content<span class="ot">;</span>
+    }
+}</code></pre>
+<p>Update the <code>process()</code> method in the <code>App</code> class to use this new class:</p>
+<pre class="sourceCode php"><code class="sourceCode php">$response = call_user_func_array($route-&gt;getCallable(), $arguments);
+
+if (!$response instanceof Response) {
+    $response = new Response($response);
+}
+
+$response-&gt;send();</code></pre>
+<p>Now, you can return a string as you used to do <strong>OR</strong> directly a <code>Response</code> object.</p>
+<p>Does everything work as expected?</p>
+<h4 id="update-your-controllers">Update Your Controllers</h4>
+<p>Use the new methods created in the <code>Request</code> class, and return a <code>Response</code> with the right content/headers, in each controller's function. You can rely on the Serializer component, but using <code>json_encode()</code> is easier.</p>
+<p>You can use an anonymous function to factorize some code, or extend the <code>Response</code> class. Just saying...</p>
+<p>When you return a JSON response, set the right status code to the response. It has been described in the previous practical.</p>
+<h3 id="testing">Testing</h3>
+<p>In a terminal, run:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ curl -XGET <span class="st">&quot;http://localhost:8090/locations&quot;</span> -H <span class="st">&quot;Accept: application/json&quot;</span></code></pre>
+<p>You should see the list of locations as described in <em>Requirements</em>.</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ curl -XGET <span class="st">&quot;http://localhost:8090/locations/1&quot;</span> -H <span class="st">&quot;Accept: application/json&quot;</span></code></pre>
+<p>You should see the &quot;New-York&quot; location details as described in <em>Requirements</em>. (In your Model Layer, the &quot;New-York&quot; location should have its id set to <code>1</code>).</p>
+<h2 id="decode-parameters-based-on-the-content-type">Decode Parameters Based On the Content Type</h2>
+<p>When a request has a body, it should provide a <code>Content-Type</code>. This content type header is available in <code>$_SERVER['HTTP_CONTENT_TYPE']</code>.</p>
+<p>Modify the <code>createFromGlobals()</code> method to convert a JSON content (<code>application/json</code>) into parameters, and use them as <em>request</em> parameters.</p>
+<p>This snippet is useful:</p>
+<pre class="sourceCode php"><code class="sourceCode php">$data    = file_get_contents(&#39;php://input&#39;);
+$request = @json_decode($data, true);</code></pre>
+<h3 id="testing-1">Testing</h3>
+<p>Use <code>var_dump()</code> to print the <code>$request</code> variable in your &quot;post&quot; controller, and run the following command:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">vagrant@licphp:~ $ curl -XPOST <span class="st">&quot;http://localhost:8090/locations&quot;</span> -H <span class="st">&quot;Accept: application/json&quot;</span> -H <span class="st">&#39;content-type: application/json&#39;</span> -d <span class="st">&#39;{&quot;name&quot;:&quot;Paris&quot;}&#39;</span></code></pre>
+<p>The same way, you can send <code>PUT</code> and <code>DELETE</code> requests:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">vagrant@licphp:~ $ curl -XPUT <span class="st">&quot;http://localhost:8090/locations/1&quot;</span> -H <span class="st">&quot;Accept: application/json&quot;</span> -H <span class="st">&#39;content-type: application/json&#39;</span> -d <span class="st">&#39;{&quot;name&quot;:&quot;Paris&quot;}&#39;</span>
+
+vagrant@licphp:~ $ curl -XDELETE <span class="st">&quot;http://localhost:8090/locations/1&quot;</span> -H <span class="st">&quot;Accept: application/json&quot;</span></code></pre>
+<h2 id="going-further">Going Further</h2>
+<h3 id="testing-automation">Testing Automation</h3>
+<p>Using <a href="https://github.com/fabpot/Goutte">Goutte</a> or <a href="https://github.com/kriswallsmith/Buzz">Buzz</a> HTTP clients, create a simple script executing scenarios to test your API content negotiation feature.</p>
+<p>If you feel like using <a href="http://phpunit.de/">PHPUnit</a> to implement your tests, go ahead, it will be useful for your whole php developer life!</p>
+</div>
+</body>
+</html>
