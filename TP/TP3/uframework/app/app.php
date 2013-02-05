@@ -1,6 +1,8 @@
 <?php
 
-require __DIR__ . '/../autoload.php';
+$loader = require __DIR__ . '/../vendor/autoload.php';
+$loader->add('', __DIR__);
+
 
 // Config
 $debug = true;
@@ -13,44 +15,83 @@ $app = new \App(new View\TemplateEngine(
  * Index
  */
 $app->get('/', function () use ($app) {
-    return $app->render('index.php');
+    $app->redirect('/locations');
 });
 
 $app->get('/locations', function (Http\Request $request) use ($app) {
+	
 	$locations = new Model\Locations();
-    return $app->render('locations.php', array("locations" => $locations->findAll()));
+	
+	if($request->guessBestFormat() === 'json'){
+		
+		$content = json_encode($locations->findAll());
+		return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
+		
+	}
+	
+    return new Http\Response($app->render('locations.php', array("locations" => $locations->findAll())));
 });
 
 $app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
+	
 	$locations = new Model\Locations();
 	$location = $locations->findOneById($id);
 	
-	if(!empty($location))
-	{ 
-		return $app->render('location.php',  array("location" => $location, "id" => $id));
+	if(!empty($location)){ 
+		
+		if($request->guessBestFormat() === 'json'){
+			
+			$content = json_encode($location);
+			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
+			
+		}
+		
+		return new Http\Response($app->render('location.php',  array("location" => $location)));
 	}
-	throw new Exception\HttpException('404',"Location not found, Mind your own business!!");
+	throw new Exception\NotFoundHttpException();
     
 });
 
 // create location
 $app->post('/locations', function (Http\Request $request) use ($app) {
+	
 	$locations = new Model\Locations();
-	$locations->create($request->getParameter("name"));
-    $app->redirect('/locations');
+	$newLocation = $request->getParameter('name');
+	
+	if(!empty($newLocation)){
+		
+		$content = $locations->create($newLocation);
+		if($request->guessBestFormat() === 'json'){
+			
+			$content = json_encode($content);
+			return new Http\Response($content, 201, array('Content-Type' => $request->guessBestFormat()));
+			
+		}
+    	$app->redirect('/locations');
+    	
+	}
+	throw new Exception\NotAcceptableHttpException();
 });
 
 // update location
 $app->put('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
+	
 	$locations = new Model\Locations();
 	$location = $locations->findOneById($id);
 	
-	if(!empty($location))
-	{ 
-		$locations->update($id, $request->getParameter("name"));
+	if(!empty($location)){ 
+		
+		$content = $locations->update($id, $request->getParameter("name"));
+		if($request->guessBestFormat() === 'json'){
+			
+			$content = json_encode($content);
+			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
+			
+		}
 		$app->redirect('/locations/'.$id);
+		
 	}
-	throw new Exception\HttpException('404',"Location doesn't exist, Mind your own business!!");
+	throw new Exception\NotFoundHttpException();
     
 });
 
@@ -59,12 +100,19 @@ $app->delete('/locations/(\d+)', function (Http\Request $request, $id) use ($app
     $locations = new Model\Locations();
 	$location = $locations->findOneById($id);
 	
-	if(!empty($location))
-	{ 
-		$locations->delete($id);
+	if(!empty($location)){ 
+		
+		$content = $locations->delete($id);
+		if($request->guessBestFormat() === 'json'){
+			
+			$content = json_encode($content);
+			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
+			
+		}
 		$app->redirect('/locations');
+		
 	}
-	throw new Exception\HttpException('404',"Location doesn't exist, Mind your own business!!");
+	throw new Exception\NotFoundHttpException();
 });
 
 return $app;
