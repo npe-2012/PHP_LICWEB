@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+  <style type="text/css">
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; background-color: #f8f8f8; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+pre, code { background-color: #f8f8f8; }
+code > span.kw { color: #204a87; font-weight: bold; }
+code > span.dt { color: #204a87; }
+code > span.dv { color: #0000cf; }
+code > span.bn { color: #0000cf; }
+code > span.fl { color: #0000cf; }
+code > span.ch { color: #4e9a06; }
+code > span.st { color: #4e9a06; }
+code > span.co { color: #8f5902; font-style: italic; }
+code > span.ot { color: #8f5902; }
+code > span.al { color: #ef2929; }
+code > span.fu { color: #000000; }
+code > span.er { font-weight: bold; }
+  </style>
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+<h1 id="playing-with-a-database">Playing With A Database</h1>
+<br />
+<h4 id="update-read-this-carefully">UPDATE: READ THIS CAREFULLY</h4>
+<p>All of you, students, have to run the following commands. I said <strong>ALL</strong> of you.</p>
+<p>Update the configuration by running the following commands on the host machine:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">$ git pull origin master
+$ git submodule update --init
+$ vagrant reload</code></pre>
+<p>If something went wrong, <strong>email us</strong> as soon as possible!</p>
+<br />
+<h2 id="introduction">Introduction</h2>
+<p>This update adds a <a href="http://www.mysql.fr/">MySQL</a> database server, its client, and it also creates a database named <code>uframework</code>.</p>
+<p>You can access this database with the user <code>uframework</code> and the password <code>uframework123</code>.</p>
+<h2 id="your-first-database-layer">Your First Database Layer</h2>
+<p>Write a SQL script named <code>app/config/schema.sql</code> to create a <code>locations</code> table with the following rules:</p>
+<ul>
+<li>This table contains three columns: <code>id</code>, <code>name</code> and <code>created_at</code>;</li>
+<li>The <code>id</code> column contains <code>integer</code> values;</li>
+<li>The <code>id</code> column cannot be <strong>null</strong>;</li>
+<li>The <code>id</code> column is <strong>auto incremented</strong>;</li>
+<li>The <code>id</code> column is a <strong>primary key</strong>;</li>
+<li>The <code>name</code> column contains strings (less than 250 chars);</li>
+<li>The <code>name</code> column cannot be <strong>null</strong>;</li>
+<li>The <code>created_at</code> column contains <strong>datetime</strong> values;</li>
+<li>The <code>created_at</code> column can be <strong>null</strong>.</li>
+</ul>
+<p>The script MUST contain a constraint if the table already exists, something like:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql"><span class="kw">CREATE</span> <span class="kw">TABLE</span> <span class="kw">IF</span> <span class="kw">NOT</span> <span class="kw">EXISTS</span> tbl_name</code></pre>
+<p>Now, create your database:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">vagrant@vm-licpro:/var/www/uframework$ mysql uframework -uuframework -puframework123 <span class="kw">&lt;</span> app/config/schema.sql</code></pre>
+<p>Now that you have a database, and a table, update your Model Layer (aka the <code>Locations</code> class) to manipulate a database instead of a file.</p>
+<p>In order to do that, you HAVE TO:</p>
+<ul>
+<li>use <a href="http://php.net/manual/book.pdo.php">PDO</a>;</li>
+<li>use a <code>Connection</code> class as described in the last course;</li>
+<li>inject a <code>Connection</code> instance in the <code>Locations</code> class;</li>
+<li>use the <code>Connection</code> instance to execute queries, then again it has been described in the last course;</li>
+<li>ignore the <code>created_at</code> column by now.</li>
+</ul>
+<p>The <code>Connection</code> should be created in <code>app/app.php</code> and passed to the <code>Locations</code> instance(s). That way, the configuration part is located in only one place (into the <code>app/app.php</code> file).</p>
+<p>The <code>find*()</code> methods won't use the <code>executeQuery()</code> method, you will have to write your own logic to return the data (hint: <code>FETCH_ASSOC</code> will be your friend).</p>
+<p>You MAY need to update the templates and/or the JSON data.</p>
+<p>Now, check everything still works.</p>
+<h2 id="in-depth-with-databases">In-Depth With Databases</h2>
+<div class="figure">
+<img src="http://yuml.me/diagram/scruffy;/class/%5BLocation%7C-id;-name;-createdAt%7C+getId();+getName();+setName();+getCreatedAt()%5D%22.png" /><p class="caption"></p>
+</div>
+<p>Start by writing a <code>Location</code> class (read the name carefully, there is no &quot;s&quot; here). This class should contain getters/setters for the following attributes:</p>
+<ul>
+<li><code>id</code>;</li>
+<li><code>name</code>;</li>
+<li><code>createdAt</code>.</li>
+</ul>
+<p>The constructor of this class takes the same parameters as arguments, the last argument is <em>nullable</em> (<em>optional</em>). Add a typehint to this argument too (it's a datetime, what is the PHP date class?)</p>
+<p>It's time to use this class in your <code>Locations</code> class:</p>
+<ol style="list-style-type: decimal">
+<li><p>In method <code>findAll()</code> use <code>array_map()</code> in order to return a set of <code>Location</code> objects. Each object will be created on the fly.</p></li>
+<li><p>In method <code>findOneById()</code>, return an instance of <code>Location</code>, or <code>null</code> if not found.</p></li>
+</ol>
+<p>In both cases, the <code>created_at</code> value can be <code>null</code>, so you have to check whether it's a datetime, or <code>null</code>. If it's a datetime, convert it to a PHP date before injecting it into the <code>Location</code> class.</p>
+<p>Update your templates to reflect these changes.</p>
+<p>Also, update the JSON part (either by using getters, or by using the Serializer component).</p>
+<blockquote>
+<p><strong>Tip:</strong> the Serializer component is really powerful, and simple to use. It's worth using it.</p>
+</blockquote>
+<h2 id="introducing-the-data-mapper">Introducing The Data Mapper</h2>
+<p>You have a Model Layer with a <strong>Data Access Layer</strong> thanks to the <code>Connection</code> class, and PDO.</p>
+<p>Implement a <code>LocationDataMapper</code> class. This class HAS TO implement the <strong>Data Mapper</strong> design pattern, and should leverage the <code>Connection</code> class. Write an interface for such a design pattern, and use it in your <code>LocationDataMapper</code> class. This interface HAS TO be generic enough.</p>
+<p>Remove the <code>PersistenceInterface</code> from your project, and remove the code related to this interface in the <code>Locations</code> class. Note that this code could be moved to the <code>LocationDataMapper</code> class.</p>
+<p>In the <code>LocationDataMapper</code> class, take care of the <code>created_at</code> attribute. The <code>DateTime</code> class contains a <code>format()</code> method:</p>
+<pre class="sourceCode php"><code class="sourceCode php">$object-&gt;getCreatedAt()-&gt;format(&#39;Y-m-d H:i:s&#39;);</code></pre>
+<p>The <code>Y-m-d H:i:s</code> format is the one used by MySQL for its <code>DATETIME</code> type.</p>
+<p>Now, rename your <code>Locations</code> class into <code>LocationFinder</code> class.</p>
+<p>You should have a cleaner Model Layer containing:</p>
+<ul>
+<li>a DAL thanks to the <code>Connection</code> class;</li>
+<li>a DataMapper to persist/remove Plain Old PHP Objects (POPO);</li>
+<li>a Finder to perform queries and retrieve sets of POPOs.</li>
+</ul>
+<p>Update your controllers to use these classes when it's needed.</p>
+<p>Creating a new <code>Location</code> should set the <code>createdAt</code> argument to the current date, and the PHP type for such attribute is <code>DateTime</code>. Creating an instance of <code>DateTime</code> is enough to get the current date.</p>
+<h2 id="dealing-with-relations">Dealing With Relations</h2>
+<div class="figure">
+<img src="http://yuml.me/diagram/scruffy;/class/%5BLocation%7C...%7C...;+getComments();+setComments()%5D1-0..*%5BComment%7C-id;-username;-body;-createdAt%7C+getId();+getUsername();+setUsername();+getBody();+setBody();+getCreatedAt()%5D.png" /><p class="caption"></p>
+</div>
+<p>Add a new class <code>Comment</code>to your Model Layer. This class contains the following attributes:</p>
+<ul>
+<li><code>id</code>;</li>
+<li><code>username</code>;</li>
+<li><code>body</code>;</li>
+<li><code>createdAt</code>.</li>
+</ul>
+<p>Now, think about linking both the <code>Location</code> and the <code>Comment</code> classes. A location owns <strong>0 or more</strong> comments. A comment is tied to only <strong>one</strong> location.</p>
+<p>What do you need in both classes to create this relation? What would be the SQL code for such a relation?</p>
+<p><strong>Call for validation</strong> once you have the answer. You have to explain how to deal with objects, and to provide the SQL statements used to create the table <code>comments</code>. This is not easy.</p>
+<p>Implement your solution.</p>
+<p>Update the <code>LocationFinder</code> class to return the locations <strong>and their comments</strong>.</p>
+<p>SSH into the Virtual Machine, then open a MySQL session:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">vagrant@vm-licpro:/var/www$ mysql -uuframework -puframework123 uframework</code></pre>
+<p>Now, insert a few comments for a given location:</p>
+<pre class="sourceCode sql"><code class="sourceCode sql">mysql&gt; <span class="kw">INSERT</span> <span class="kw">INTO</span> comments (username, <span class="kw">body</span>, location_id) <span class="kw">VALUES</span>(<span class="st">&#39;William&#39;</span>, <span class="st">&#39;Good job guys!&#39;</span>, <span class="dv">1</span>);
+mysql&gt; <span class="kw">INSERT</span> <span class="kw">INTO</span> comments (username, <span class="kw">body</span>, location_id) <span class="kw">VALUES</span>(<span class="st">&#39;Julien&#39;</span>, <span class="st">&#39;Good job guys!&#39;</span>, <span class="dv">1</span>);</code></pre>
+<p>Add a new route <code>GET /locations/(\d+)/comments</code> that returns the comments for a given location. This action will return JSON data only.</p>
+<p>If you are using the Serializer component, then ask your teacher to fix a potential issue. To be more precise, you MAY serialize a <strong>cycle</strong> between locations and comments, and it will lead in memory issues.</p>
+<p>You're done with this practical.</p>
+</div>
+</body>
+</html>
