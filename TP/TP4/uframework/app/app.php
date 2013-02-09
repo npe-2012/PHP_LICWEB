@@ -12,7 +12,7 @@ $app = new \App(new View\TemplateEngine(
     __DIR__ . '/templates/'
 ), $debug);
 
-$connection = new \Model\Connection('mysql:host=localhost;dbname=uframework', 'root', 'daewon');
+$connection = new \Model\Connection('mysql:host=localhost;dbname=uframework', 'uframework', 'uframework123');
 
 /**
  * Index
