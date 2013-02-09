@@ -85,8 +85,8 @@
             ],
             "description": "A Negotiation library",
             "keywords": [
-                "format",
                 "content",
+                "format",
                 "negotiation"
             ]
         }

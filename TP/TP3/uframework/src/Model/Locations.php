@@ -1,4 +1,5 @@
 <?php
+use Model\Connection;
 
 namespace Model;
 
@@ -6,7 +7,15 @@ class Locations implements FinderInterface
 {
 	
 	private static $URI_DATA_LOCATIONS = "./../src/Data/Locations.json";
-
+	
+	
+	private $connection = null;
+	
+	
+	public function __construct(Connection $con)
+	{
+		$this->connection = $con;
+	}
 		
 	/**
      * Returns all elements.
@@ -15,7 +24,16 @@ class Locations implements FinderInterface
      */
     public function findAll()
     {
-		return array_unique($this->loadData());
+		$callback = function($location)
+		{
+			$date = $location['created_at'];
+			if(!empty($date)){
+				$date = \DateTime::createFromForm('d/m/Y', $date);
+			}
+			
+			return new Location($location['id'],$location['name'], $date);
+		};
+		return array_map($callback, $this->connection->findAll());
 	}
 
     /**
@@ -26,24 +44,19 @@ class Locations implements FinderInterface
      */
     public function findOneById($id)
     {
-		$location = "";
+		$location = $this->connection->findById($id);
 		
-		foreach(array_unique($this->loadData()) as $key => $val)
-		{
-			if( $key === intval($id))
-			{
-				$location = $val;
+		if(!empty($location)){
+			
+			$date = $location['created_at'];
+			
+			if(!empty($date)){
+				$date = \DateTime::createFromForm('d/m/Y', $date);
 			}
+			
+			return new Location($location['id'], $location['name'], $date);	
 		}
-		
-		if(!Empty($location ))
-		{
-			return array('id' => $id, 'name' => $location);
-		}
-		else
-		{
-			return null;
-		}
+		return null;
 	}
 	
 	 /**
@@ -52,77 +65,55 @@ class Locations implements FinderInterface
      * @param  mixed      $name
      * @return array
      */
-	public function create($name)
+	public function create($name, \DateTime $createdAt = null)
 	{
-		$locations = $this->loadData();
-		$id = $this->nextId();
-		$locations[intval($id)]= $name;
-		$this->saveData($locations);
-		return array('id' => $id, 'name' => $locations);
+		$query = 'INSERT INTO LOCATIONS(name, created_at) VALUES(:name, :date)';
 		
+		$this->connection->executeQuery($query, array(
+			'name' => $name,
+			'created_at' => $createdAt
+		));
+		return $this->findAll();
 	}
 	
 	/**
      * update a location
      * @param mixed $id
      * @param mixed $name
-     * @return array|null
+     * @return array
      */
     public function update($id, $name)
     {
-		$locations = $this->loadData();
-		$id = intval($id);
-		if(!empty($locations[$id]))
+		$query = 'UPDATE LOCATIONS SET name = :name WHERE id = :id';
+		$location = $this->connection->findById($id);
+		
+		if(!empty($location))
 		{
-			$locations[$id] = $name;
-			$this->saveData($locations);
-			return array('id' => $id, 'name' => $name);
+			$location = $this->connection->executeQuery($query, array(
+				'id' => $id,
+				'name' => $name
+			));
 		}
-		return null;
+		return $this->findOneById($id);
 	}
     
     
     /**
      * delete a location
      * @param mixed $id
-     * @return array|null
+     * @return array
      */
     public function delete($id)
     {
-		$locations = $this->loadData();
-		$id = intval($id);
-		if(!empty($locations[$id]))
+		$query = 'DELETE FROM LOCATIONS WHERE id = :id';
+		$location = $this->connection->findById($id);
+		
+		if(!empty($location))
 		{
-			unset($locations[$id]);
-			$this->saveData($locations);
-			return $locations;
+			$this->connection->executeQuery($query, array(
+				'id' => $id
+			));
 		}
-		return null;
-	}
-	
-    
-     /**
-     * Load data of csv file
-     *
-     * @return array
-     */
-    private function loadData()
-    {
-		return array_unique(json_decode(file_get_contents(self::$URI_DATA_LOCATIONS), true));
-	}
-	
-	private function saveData($locations)
-	{
-		file_put_contents(self::$URI_DATA_LOCATIONS, json_encode(array_unique($locations), JSON_FORCE_OBJECT));	
-	}
-	
-	private function lastId()
-	{
-		return count($this->loadData())-1;
-	}
-	
-	private function nextId()
-	{
-		return count($this->loadData());
+		return $this->findAll();
 	}
 }

@@ -24,7 +24,7 @@ class Locations implements FinderInterface
      */
     public function findAll()
     {
-		foreach($this->connection->find() as $val)
+		/*foreach($this->connection->find() as $val)
 		{
 		$callback = function($location){
 			$createdAt = $location['created_at'];
@@ -33,8 +33,11 @@ class Locations implements FinderInterface
 			}
 			
 			return new \Model\Location($location['id'], $location['name'], $createdAt);
-		};
-		return array_map($callback, $this->connection->find());
+		};*/
+		echo "sfsdf";
+		die;
+		//return array_map($callback, $this->connection->find());
+		
 	}
 
     /**

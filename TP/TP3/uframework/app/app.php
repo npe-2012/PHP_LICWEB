@@ -1,5 +1,6 @@
 <?php
 
+
 $loader = require __DIR__ . '/../vendor/autoload.php';
 $loader->add('', __DIR__);
 
@@ -11,6 +12,8 @@ $app = new \App(new View\TemplateEngine(
     __DIR__ . '/templates/'
 ), $debug);
 
+$connnection = new \Model\Connection('mysql:host=localhost;dbname=uframework', 'root', 'daewon');
+
 /**
  * Index
  */
@@ -18,32 +21,31 @@ $app->get('/', function () use ($app) {
     $app->redirect('/locations');
 });
 
-$app->get('/locations', function (Http\Request $request) use ($app) {
+$app->get('/locations', function (Http\Request $request) use ($app,$connnection) {
 	
-	$locations = new Model\Locations();
+	$locations = new Model\Locations($connnection);
+	$locationsList = $locations->findAll();
 	
-	if($request->guessBestFormat() === 'json'){
+	if(!empty($locationsList)){
 		
-		$content = json_encode($locations->findAll());
-		return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-		
+		if($request->guessBestFormat() === 'json'){
+			return new Http\JsonResponse($locationsList);
+		}
+	
+		return new Http\Response($app->render('locations.php', array("locations" => $locationsList)));
+	
 	}
-	
-    return new Http\Response($app->render('locations.php', array("locations" => $locations->findAll())));
+	throw new Exception\NotFoundHttpException("No locations found");
 });
 
-$app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
-	
-	$locations = new Model\Locations();
+$app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $connnection) {
+	$locations = new Model\Locations($connnection);
 	$location = $locations->findOneById($id);
 	
 	if(!empty($location)){ 
 		
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($location);
-			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content);
 		}
 		
 		return new Http\Response($app->render('location.php',  array("location" => $location)));
@@ -53,20 +55,19 @@ $app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
 });
 
 // create location
-$app->post('/locations', function (Http\Request $request) use ($app) {
+$app->post('/locations', function (Http\Request $request) use ($app, $connnection) {
 	
-	$locations = new Model\Locations();
-	$newLocation = $request->getParameter('name');
+	$locations = new Model\Locations($connnection);
+	$locationName = $request->getParameter('name');
+	$locationDate = new \DateTime(null);
 	
-	if(!empty($newLocation)){
+	if(!empty($locationName)){
 		
 		$content = $locations->create($newLocation);
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($content);
-			return new Http\Response($content, 201, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content, 201);
 		}
+		
     	$app->redirect('/locations');
     	
 	}
@@ -74,20 +75,21 @@ $app->post('/locations', function (Http\Request $request) use ($app) {
 });
 
 // update location
-$app->put('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
+$app->put('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $connnection) {
 	
-	$locations = new Model\Locations();
+	$locations = new Model\Locations($connnection);
 	$location = $locations->findOneById($id);
 	
 	if(!empty($location)){ 
 		
 		$content = $locations->update($id, $request->getParameter("name"));
+		
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($content);
-			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content);
 		}
+		
+		var_dump($content);
+		die;
 		$app->redirect('/locations/'.$id);
 		
 	}
@@ -96,19 +98,18 @@ $app->put('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
 });
 
 // delete location
-$app->delete('/locations/(\d+)', function (Http\Request $request, $id) use ($app) {
-    $locations = new Model\Locations();
+$app->delete('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $connnection) {
+    $locations = new Model\Locations($connnection);
 	$location = $locations->findOneById($id);
 	
 	if(!empty($location)){ 
 		
 		$content = $locations->delete($id);
+		
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($content);
-			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content, 200, array('Content-Type' => $request->guessBestFormat()));
 		}
+		
 		$app->redirect('/locations');
 		
 	}
