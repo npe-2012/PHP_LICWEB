@@ -11,10 +11,11 @@ class Location
 	
 	private $createdAt;
 	
+	private $comments;
 	
-	public function __construct($id, $name, \DateTime $createdAt = null)
+	
+	public function __construct($name, \DateTime $createdAt = null)
 	{
-		$this->id = $id;
 		$this->name = $name;
 		$this->createdAt = $createdAt;
 	}
@@ -37,5 +38,10 @@ class Location
 	public function getCreatedAt()
 	{
 		return $this->createdAt;
+	}
+	
+	public function getComments()
+	{
+		return $this->comments;
 	}
 } 
