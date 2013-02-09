@@ -12,7 +12,7 @@ $app = new \App(new View\TemplateEngine(
     __DIR__ . '/templates/'
 ), $debug);
 
-$connnection = new \Model\Connection('mysql:host=localhost;dbname=uframework', 'uframework', 'uframework123');
+$connnection = new \Model\Connection('mysql:host=localhost;dbname=uframework', 'root', 'daewon');
 
 /**
  * Index
@@ -24,29 +24,28 @@ $app->get('/', function () use ($app) {
 $app->get('/locations', function (Http\Request $request) use ($app,$connnection) {
 	
 	$locations = new Model\Locations($connnection);
+	$locationsList = $locations->findAll();
 	
-	if($request->guessBestFormat() === 'json'){
+	if(!empty($locationsList)){
 		
-		$content = json_encode($locations->findAll());
-		return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-		
+		if($request->guessBestFormat() === 'json'){
+			return new Http\JsonResponse($locationsList);
+		}
+	
+		return new Http\Response($app->render('locations.php', array("locations" => $locationsList)));
+	
 	}
-	
-    return new Http\Response($app->render('locations.php', array("locations" => $locations->findAll())));
+	throw new Exception\NotFoundHttpException("No locations found");
 });
 
 $app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $connnection) {
-	
 	$locations = new Model\Locations($connnection);
 	$location = $locations->findOneById($id);
 	
 	if(!empty($location)){ 
 		
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($location);
-			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content);
 		}
 		
 		return new Http\Response($app->render('location.php',  array("location" => $location)));
@@ -59,17 +58,16 @@ $app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $
 $app->post('/locations', function (Http\Request $request) use ($app, $connnection) {
 	
 	$locations = new Model\Locations($connnection);
-	$newLocation = $request->getParameter('name');
+	$locationName = $request->getParameter('name');
+	$locationDate = new \DateTime(null);
 	
-	if(!empty($newLocation)){
+	if(!empty($locationName)){
 		
 		$content = $locations->create($newLocation);
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($content);
-			return new Http\Response($content, 201, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content, 201);
 		}
+		
     	$app->redirect('/locations');
     	
 	}
@@ -85,12 +83,13 @@ $app->put('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $
 	if(!empty($location)){ 
 		
 		$content = $locations->update($id, $request->getParameter("name"));
+		
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($content);
-			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content);
 		}
+		
+		var_dump($content);
+		die;
 		$app->redirect('/locations/'.$id);
 		
 	}
@@ -106,12 +105,11 @@ $app->delete('/locations/(\d+)', function (Http\Request $request, $id) use ($app
 	if(!empty($location)){ 
 		
 		$content = $locations->delete($id);
+		
 		if($request->guessBestFormat() === 'json'){
-			
-			$content = json_encode($content);
-			return new Http\Response($content, 200, array('Content-Type' => $request->guessBestFormat()));
-			
+			return new Http\JsonResponse($content, 200, array('Content-Type' => $request->guessBestFormat()));
 		}
+		
 		$app->redirect('/locations');
 		
 	}

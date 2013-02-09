@@ -1,7 +1,7 @@
 <h2>Locations:</h2>
 <ul>
 	<?php foreach($locations as $val): ?>
-		<?= "<li>".$val['id']." - ".$val['name']."</li>" ?>
+		<?= "<li>".$val->getId()." - ".$val->getName()."</li>" ?>
 	<?php endforeach; ?>
 </ul>
 

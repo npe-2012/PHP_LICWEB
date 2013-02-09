@@ -11,7 +11,8 @@ class Location
 	
 	private $createdAt;
 	
-	public function __constructor($id, $name, $createdAt = null)
+	
+	public function __construct($id, $name, \DateTime $createdAt = null)
 	{
 		$this->id = $id;
 		$this->name = $name;

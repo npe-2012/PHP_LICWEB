@@ -24,20 +24,16 @@ class Locations implements FinderInterface
      */
     public function findAll()
     {
-		/*foreach($this->connection->find() as $val)
+		$callback = function($location)
 		{
-		$callback = function($location){
-			$createdAt = $location['created_at'];
-			if(null !== $createdAt ){
-				$createdAt = strtotime($createdAt);
+			$date = $location['created_at'];
+			if(!empty($date)){
+				$date = \DateTime::createFromForm('d/m/Y', $date);
 			}
 			
-			return new \Model\Location($location['id'], $location['name'], $createdAt);
-		};*/
-		echo "sfsdf";
-		die;
-		//return array_map($callback, $this->connection->find());
-		
+			return new Location($location['id'],$location['name'], $date);
+		};
+		return array_map($callback, $this->connection->findAll());
 	}
 
     /**
@@ -48,24 +44,19 @@ class Locations implements FinderInterface
      */
     public function findOneById($id)
     {
-		$location = "";
+		$location = $this->connection->findById($id);
 		
-		foreach(array_unique($this->loadData()) as $key => $val)
-		{
-			if( $key === intval($id))
-			{
-				$location = $val;
+		if(!empty($location)){
+			
+			$date = $location['created_at'];
+			
+			if(!empty($date)){
+				$date = \DateTime::createFromForm('d/m/Y', $date);
 			}
+			
+			return new Location($location['id'], $location['name'], $date);	
 		}
-		
-		if(!Empty($location ))
-		{
-			return array('id' => $id, 'name' => $location);
-		}
-		else
-		{
-			return null;
-		}
+		return null;
 	}
 	
 	 /**
@@ -74,77 +65,55 @@ class Locations implements FinderInterface
      * @param  mixed      $name
      * @return array
      */
-	public function create($name)
+	public function create($name, \DateTime $createdAt = null)
 	{
-		$query = 'INSERT INTO LOCATIONS(name) VALUES(:name)';
+		$query = 'INSERT INTO LOCATIONS(name, created_at) VALUES(:name, :date)';
 		
-		return $this->connection->executeQuery($query, array('name' => $name));		
+		$this->connection->executeQuery($query, array(
+			'name' => $name,
+			'created_at' => $createdAt
+		));
+		return $this->findAll();
 	}
 	
 	/**
      * update a location
      * @param mixed $id
      * @param mixed $name
-     * @return array|null
+     * @return array
      */
     public function update($id, $name)
     {
-		$id = intval($id);
 		$query = 'UPDATE LOCATIONS SET name = :name WHERE id = :id';
-		$location = $this->find($id);
+		$location = $this->connection->findById($id);
+		
 		if(!empty($location))
 		{
-			return $this->connection->executeQuery($query, array(
+			$location = $this->connection->executeQuery($query, array(
 				'id' => $id,
 				'name' => $name
 			));
 		}
-		return null;
+		return $this->findOneById($id);
 	}
     
     
     /**
      * delete a location
      * @param mixed $id
-     * @return array|null
+     * @return array
      */
     public function delete($id)
     {
-		$id = intval($id);
 		$query = 'DELETE FROM LOCATIONS WHERE id = :id';
-		$location = $this->find($id);
+		$location = $this->connection->findById($id);
+		
 		if(!empty($location))
 		{
-			return $this->connection->executeQuery($query, array(
+			$this->connection->executeQuery($query, array(
 				'id' => $id
 			));
 		}
-		return null;
-	}
-	
-    
-     /**
-     * Load data of csv file
-     *
-     * @return array
-     */
-    private function loadData()
-    {
-		return array_unique(json_decode(file_get_contents(self::$URI_DATA_LOCATIONS), true));
-	}
-	
-	private function saveData($locations)
-	{
-		file_put_contents(self::$URI_DATA_LOCATIONS, json_encode(array_unique($locations), JSON_FORCE_OBJECT));	
-	}
-	
-	private function lastId()
-	{
-		return count($this->loadData())-1;
-	}
-	
-	private function nextId()
-	{
-		return count($this->loadData());
+		return $this->findAll();
 	}
 }

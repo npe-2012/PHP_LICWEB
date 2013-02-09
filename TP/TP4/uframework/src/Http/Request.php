@@ -12,27 +12,8 @@ class Request
 
     const DELETE = 'DELETE';
     
-    public static $instance = null;
-    
-    private $parameters = array();
-    
-    /**
-     * Static function
-     * Return an instance of Request class
-     * @return Request
-     */
-    public static function createFormGlobals()
-    {
-		if(self::$instance === null){
-								
-				if(isset($_SERVER['HTTP_CONTENT_TYPE'])){
-				}
-
-				self::$instance = new self($_GET, $_POST);
-		}
-		return self::$instance;
-	}
-    
+    private $parameters;
+        
     
 	/**
 	 * Request's constructor
@@ -42,6 +23,26 @@ class Request
     public function __construct(array $query = array(), array $request = array())
     {
 		$this->parameters = array_merge($query, $request);
+	}
+    
+    /**
+     * Static function
+     * Return an instance of Request class
+     * @return Request
+     */
+    public static function createFormGlobals()
+    {
+		if(isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] === 'application/json'){
+				
+				$data    = file_get_contents('php://input');
+                $request = @json_decode($data, true);
+                $request = array_merge($request, array("_method" => $_SERVER['REQUEST_METHOD']));			
+				
+		}
+		else{
+			$request = $_POST;
+		}
+		return new self($_GET, $request);
 	}
     
     

@@ -12,17 +12,21 @@ class Connection extends \PDO
             $stmt->bindValue(':' . $name, $value);
         }
 
-        return $stmt->execute();
+        $stmt->execute();
+        return $stmt->fetchAll();
     }
     
-    public function find($id = null)
+    public function findAll()
     {
 		$query = "SELECT * FROM LOCATIONS";
-		if(null !== $id)
-		{
-			$query += " WHERE id = :id";
-		}
-		
+		$stmt = $this->prepare($query);
+		$stmt->execute();
+		return $stmt->fetchAll();
+	}
+	
+	public function findById($id)
+	{
+		$query = "SELECT * FROM LOCATIONS WHERE id = :id";
 		$stmt = $this->prepare($query);
 		$stmt->bindValue(':id', $id);
 		$stmt->execute();
