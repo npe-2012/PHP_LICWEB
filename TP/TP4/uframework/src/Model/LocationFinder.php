@@ -45,7 +45,7 @@ class LocationFinder implements FinderInterface
     public function findOneById($id)
     {
 		$query = "SELECT * FROM LOCATIONS WHERE id = :id";
-		$stmt = $this->prepare($query);
+		$stmt = $this->connection->prepare($query);
 		$stmt->bindValue(':id', $id);
 		$stmt->execute();
 		$location = $stmt->fetch(\PDO::FETCH_ASSOC);
@@ -80,9 +80,9 @@ class LocationFinder implements FinderInterface
 				$date = new \DateTime($date);
 			}
 			
-			$com = new Comment($comment['username'], $comment['body'], $date)
+			$com = new Comment($comment['username'], $comment['body'], $date);
 			\Tools\CommentReflection::setPropertyComment($com, $comment['id']);
-			return $loc;
+			return $com;
 		};
 		
         $query = 'SELECT * FROM COMMENTS WHERE LOCATION_ID = :id';

@@ -10,10 +10,10 @@ class CommentReflection
 	const CREATED_AT = 'created_at';
 		
 	
-	public static function setPropertyLocation(\Model\Comment $comment, $value, $attribute = self::ID)
+	public static function setPropertyComment(\Model\Comment $comment, $value, $attribute = self::ID)
 	{
 		$reflection = new \ReflectionClass('Tools\CommentReflection');
-		$commentRef = new \ReflectionClass(get_class($location));
+		$commentRef = new \ReflectionClass(get_class($comment));
 		
 		foreach($reflection->getConstants() as $constant)
 		{

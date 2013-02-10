@@ -4,13 +4,13 @@ namespace Model;
 
 class Comment
 {
-	private id;
+	private $id;
 	
-	private username;
+	private $username;
 	
-	private body;
+	private $body;
 	
-	private createdAt;
+	private $createdAt;
 	
 	public function __construct($username, $body, $createdAt)
     {

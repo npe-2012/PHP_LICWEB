@@ -45,13 +45,24 @@ $app->get('/locations/(\d+)', function (Http\Request $request, $id) use ($app, $
 	if(!empty($location)){ 
 		
 		if($request->guessBestFormat() === 'json'){
-			return new Http\JsonResponse($content);
+			return new Http\JsonResponse($location);
 		}
 		
 		return new Http\Response($app->render('location.php',  array("location" => $location)));
 	}
 	throw new Exception\NotFoundHttpException();
     
+});
+
+// get comments for a locations
+$app->get('/locations/(\d+)/comments', function(Http\Request $request, $id) use ($app, $connection) {
+	$finder = new Model\LocationFinder($connection);
+	$location = $finder->findOneById($id);
+	
+	if(!empty($location) && $request->guessBestFormat() == 'json'){
+		return new Http\JsonResponse($finder->findCommentsByLocationId($location->getId()));
+	}
+	throw new Exception\NotFoundHttpException();
 });
 
 // create location
@@ -66,13 +77,13 @@ $app->post('/locations', function (Http\Request $request) use ($app, $connection
 		$location = new Location($locationName, $locationDate);
 		$mapper->persist($location);
 		if($request->guessBestFormat() === 'json'){
-			return new Http\JsonResponse($location, 201);
+			return new Http\JsonResponse($location->getId(), 201);
 		}
 		
     	$app->redirect('/locations');
     	
 	}
-	throw new Exception\NotAcceptableHttpException();
+	throw new Exception\BadRequestHttpException();
 });
 
 // update location
@@ -110,26 +121,13 @@ $app->delete('/locations/(\d+)', function (Http\Request $request, $id) use ($app
 		$mapper->remove($location);
 		
 		if($request->guessBestFormat() === 'json'){
-			return new Http\JsonResponse($location, 204);
+			return new Http\JsonResponse(null, 204);
 		}
 		
 		$app->redirect('/locations');
 		
 	}
-	throw new Exception\NotFoundHttpException();
+	throw new Exception\BadRequestHttpException();
 });
-
-
-// get comments for a locations
-$app->get('locations/(\d+)/comments', function(Http\Request $request, $id) use ($app, $connection) {
-	$finder = new Model\LocationFinder($connection);
-	$location = $finder->findOneById($id);
-	
-	if(!empty($location) && $request->guessBestFormat() == 'json'){
-		return new Http\JsonResponse($location);
-	}
-	throw new Exception\ForbiddenHttpException();
-}
-
 
 return $app;
