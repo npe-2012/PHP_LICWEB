@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="generator" content="pandoc">
+  <title></title>
+  <!--[if lt IE 9]>
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+  <![endif]-->
+<link href="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/css/bootstrap-combined.min.css" rel="stylesheet">
+<script src="//netdna.bootstrapcdn.com/twitter-bootstrap/2.2.2/js/bootstrap.min.js"></script>
+</head>
+<body>
+<div class="container">
+<h1 id="projet-de-fin-de-module-php">Projet de fin de module PHP</h1>
+<h2 id="préambule---modalités">Préambule - Modalités</h2>
+<p>Le projet est à rendre par mail le 17 février à 23h59 dernier délai. La pénalité de retard se comptera à la minute près !</p>
+<p>Les formats acceptés sont :</p>
+<ul>
+<li>une archive (<code>tar</code>, <code>tgz</code> ou <code>zip</code>) ;</li>
+<li><strong>ou</strong> un dépôt distant (<code>git</code>, <code>svn</code>, etc.).</li>
+</ul>
+<p>Le projet doit être accompagné des instructions de mise en route. Ainsi que d'un bilan rapide de ce qui a été fait/pas fait. Le format pour ce fichier doit être <strong>textuel</strong>, donc <code>txt</code> ou <code>markdown</code>. Nous ne pouvons pas ouvrir les fichiers Word ou Open Office.</p>
+<p>Ce bilan n'est pas un compte rendu formel, vous pouvez simplement énumérer ce qui a été fait et ce qui n'a pas été fait, en faisant des phrases courtes. Il devrait tenir sur une page, et c'est un fichier <strong>obligatoire</strong>.</p>
+<p>Aucun retard ou problème technique ne sera toléré, c'est pourquoi il est fortement conseillé de mettre également à disposition un lien de téléchargement direct sur un service en ligne (dropbox, ubuntu one, google drive, etc.).</p>
+<p>Si votre archive est corrompue, vous serez défaillant, faites en sorte d'envoyer quelque chose de correct. Nous vérifierons ce point à chaque réception d'un projet. Si votre archive est corrompue, nous vous l'indiquerons et vous aurez avant 23h59 pour renvoyer une archive valide.</p>
+<p>Vous devez nommer l'archive comme suit : <code>projet_&lt;nom 1&gt;_&lt;nom 2&gt;.zip</code>. Le mail doit comporter la mention <code>[PROJET PHP]</code> dans le sujet du mail.</p>
+<h2 id="sujet">Sujet</h2>
+<p>En tant que roi des soirées étudiantes, vous êtes la référence en matière de lieux branchés. Désireux de surfer sur cette vague et fatigué d'être sans arrêt harcelé pour connaitre vos derniers bons plans, vous décidez de mettre en ligne un outil pour partager vos trouvailles.</p>
+<p>Social et collaboratif, votre nouvel outil va cartonner, vous en êtes certain, mais avant de se lancer tête dans le guidon, regardons d'un peu plus près ce à quoi cela va ressembler. Votre projet se décompose en plusieurs parties :</p>
+<ul>
+<li>Une aplication permet d'administrer le site, nous l'appellerons le <em>Backend</em>, cette application est protégée par mot de passe et seul les <em>administrateurs</em> pourront y accéder ;</li>
+<li>Le site, que nous appellerons l'application <em>Frontend</em>, est accessible à tout le monde.</li>
+</ul>
+<p>Ce projet permet de gérer trois types d'information :</p>
+<ul>
+<li>Un <strong>lieu</strong> comporte au minimum un nom et une adresse. Il est possible qu'un lieu ait un texte de présentation et un numéro de téléphone ;</li>
+<li>Une <strong>soirée</strong> comporte au minimum un horaire et peut comporter un message personnalisé ;</li>
+<li>Un <strong>commentaire</strong> comporte au minimum un nom de la personne qui a écrit le commentaire et le message ;</li>
+<li>Un <strong>lieu</strong> peut avoir plusieurs <strong>commentaires</strong> ;</li>
+<li>Un <strong>lieu</strong> peut avoir plusieurs <strong>soirées</strong>.</li>
+</ul>
+<p>Tous les &quot;éléments&quot; sont identifiés par un identifiant unique.</p>
+<p><strong>Important :</strong> l'absence de design ne sera pas pénalisant, il est conseillé de ne pas s'éterniser sur cette partie. L'important est d'avoir une application fonctionnelle.</p>
+<h3 id="application-frontend">Application Frontend</h3>
+<p>L'application <em>Frontend</em> est l'application &quot;publique&quot;, au sens où tout le monde peut y accéder librement.</p>
+<h4 id="rqf1-la-page-daccueil-liste-les-prochaines-soirées-et-les-5-derniers-lieux-ajoutés">RQF1 : La page d'accueil liste les prochaines soirées et les 5 derniers lieux ajoutés</h4>
+<p>En tant qu'utilisateur du site, dans le but d'être informé directement et rapidement, je peux accéder à la page principale du site (accueil), sur laquelle je peux voir toutes les prochaines soirées ainsi que les 5 derniers lieux ajoutés.</p>
+<h4 id="rqf2-la-page-daccueil-présente-un-lien-vers-la-liste-des-lieux">RQF2 : La page d'accueil présente un lien vers la liste des lieux</h4>
+<p>En tant qu'utilisateur du site, dans le but de voir tous les lieux du site, je dispose d'un bouton &quot;Voir tous les lieux&quot; (ou d'un lien) permettant d'accéder à la liste de tous les lieux enregistrés sur le site.</p>
+<h4 id="rqf3-la-page-daccueil-présente-un-lien-vers-la-liste-des-soirées">RQF3 : La page d'accueil présente un lien vers la liste des soirées</h4>
+<p>En tant qu'utilisateur du site, dans le but de voir toutes les soirées, je dispose d'un bouton &quot;Voir toutes les soirées&quot; (ou d'un lien) permettant d'accéder à la liste de toutes les soirées enregistrées sur le site.</p>
+<h4 id="rqf4-a-partir-de-la-liste-des-lieux-il-est-possible-de-proposer-un-nouveau-lieu">RQF4 : A partir de la liste des lieux, il est possible de proposer un nouveau lieu</h4>
+<p>En tant qu'utilisateur, dans le but de partager un bon plan, je peux créer un nouveau lieu à l'aide d'un formulaire. Ce lieu sera automatiquement ajouté et visible sur le site.</p>
+<h4 id="rqf5-a-partir-de-la-liste-des-lieux-il-est-possible-dafficher-la-page-dédiée-à-un-lieu-en-cliquant-sur-son-nom-dans-la-liste">RQF5 : A partir de la liste des lieux, il est possible d'afficher la page dédiée à un lieu en cliquant sur son nom dans la liste</h4>
+<p>En tant qu'utilisateur, dans le but d'obtenir plus d'informations sur un lieu précis, je peux accéder à une page contenant les détails de ce lieu, ceci à partir de la &quot;Liste des lieux&quot;. Cette page de détail est unique pour un lieu donné.</p>
+<h4 id="rqf6-sur-la-page-de-détail-dun-lieu-les-listes-des-commentaires-et-des-soirées-de-ce-lieu-sont-affichées">RQF6 : Sur la page de détail d'un lieu, les listes des commentaires et des soirées de ce lieu sont affichées</h4>
+<p>En tant qu'utilisateur, en naviguant sur la &quot;Page de détail&quot; d'un lieu, je peux voir les listes des commentaires et des soirées pour ce lieu.</p>
+<h4 id="rqf7-sur-la-page-de-détail-dun-lieu-il-est-possible-dajouter-un-commentaire-sur-ce-lieu">RQF7 : Sur la page de détail d'un lieu il est possible d'ajouter un commentaire sur ce lieu</h4>
+<p>En tant qu'utilisateur, dans le but de donner mon avis sur un lieu, je dispose d'un formulaire me permettant de soumettre un nouveau commentaire. Ce commentaire est directement visible.</p>
+<p>Idéalement, je ne dois pas changer de page pendant cette étape.</p>
+<h4 id="rqf8-sur-la-page-de-détail-dun-lieu-il-est-possible-dajouter-une-soirée-à-venir">RQF8 : Sur la page de détail d'un lieu il est possible d'ajouter une soirée à venir</h4>
+<p>En tant qu'utilisateur, dans le but d'informer les autres utilisateurs d'une nouvelle soirée, je dispose d'un formulaire me permettant de soumettre une nouvelle soirée à venir, dans ce lieu donné.</p>
+<p>Idéalement, je ne dois pas changer de page pendant cette étape.</p>
+<h4 id="rqf9-sur-la-page-de-détail-dun-lieu-les-informations-relatives-à-ce-lieu-sont-affichées">RQF9 : Sur la page de détail d'un lieu les informations relatives à ce lieu sont affichées</h4>
+<p>En tant qu'utilisateur, dans le but d'être informé, je dois pouvoir lire toutes les informations relatives à un lieu donné, sur sa &quot;Page de détail&quot;.</p>
+<h4 id="rqf10-mise-en-place-dune-api-rest-exposant-les-données-en-json">RQF10 : Mise en place d'une API REST, exposant les données en JSON</h4>
+<p>En tant que développeur mobile, dans le but de créer une application mobile (Android ou iOS), je peux accéder aux mêmes fonctionnalités de l'application <em>Frontend</em> grâce à une API RESTful, utilisant le format de données JSON.</p>
+<p>Idéalement, les URIs utilisées pour les fonctions décrites ci-avant restent les mêmes, et tout est basé sur le principe de Content Negotiation.</p>
+<h3 id="application-backend">Application Backend</h3>
+<p>L'application <em>Backend</em> permet d'administrer le site. Cette partie est entièrement protégée, et accessible uniquement par des administrateurs.</p>
+<h4 id="rqb1-toutes-les-pages-de-lapplication-sont-protégées-par-mot-de-passe">RQB1 : Toutes les pages de l'application sont protégées par mot de passe</h4>
+<p>En tant qu'utilisateur, je ne peux pas accéder à l'application <em>Backend</em>.</p>
+<h4 id="rqb2-une-fois-authentifié-un-administrateur-peut-naviguer-sans-se-reconnecter-à-chaque-page">RQB2 : Une fois authentifié, un administrateur peut naviguer sans se reconnecter à chaque page</h4>
+<p>En tant qu'administrateur, dans le but d'administrer l'application, je peux accéder à une page de connexion, me demandant un nom d'utilisateur et un mot de passe. Une fois authentifié, je peux accéder librement à l'ensemble de l'application <em>Backend</em>.</p>
+<h4 id="rqb3-il-est-possible-de-se-déconnecter">RQB3 : Il est possible de se déconnecter</h4>
+<p>En tant qu'administrateur connecté à l'application <em>Backend</em>, j'ai accès à un bouton &quot;Logout&quot; (ou &quot;Déconnexion&quot;) me permettant de me déconnecter de cette application <em>Backend</em>.</p>
+<p>Une fois déconnecté, je ne peux plus accéder aux pages protégées de l'application <em>Backend</em>.</p>
+<h4 id="rqb4-il-est-possible-de-modifier-ou-supprimer-des-lieux">RQB4 : Il est possible de modifier ou supprimer des lieux</h4>
+<p>En tant qu'administrateur, dans le but de gérer des lieux, je dispose d'une vue &quot;Liste des lieux&quot;, me permettant de visualiser l'ensemble des lieux de l'application.</p>
+<p>En tant qu'administrateur, dans le but de gérer des lieux, je dispose d'un bouton pour chaque lieu, me permettant de le supprimer. Eventuellement, un message d'information m'indique que le lieu a bien été supprimé. Ce message doit apparaître au niveau de la &quot;Liste des lieux&quot;.</p>
+<p>En tant qu'administrateur, dans le but de gérer les lieux, je dispose d'un bouton pour chaque lieu, me permettant de le modifier. Ce bouton m'amène sur une page d'édition du lieu. Je peux :</p>
+<ul>
+<li>annuler mon opération en cliquant sur un bouton &quot;Annuler&quot;, ce qui me ramène à la liste des lieux ;</li>
+<li>sauvegarder les modifications que j'ai apporté au lieu. Une fois ces modifications sauvegardées, je suis ramené à la liste des lieux.</li>
+</ul>
+<p>Eventuellement, un message d'information s'affiche une fois le lieu mis à jour. Ce message doit s'afficher sur la page &quot;Liste des lieux&quot;.</p>
+<h2 id="améliorations-possibles">Améliorations Possibles</h2>
+<p>Ces améliorations vous permettront de gagner plus de points. Il est fortement conseillé d'implémenter <strong>une</strong> amélioration au moins. Vous pouvez également en proposer d'autres. Enfin, vous ne perdrez pas de points sur l'implémentation de ces améliorations.</p>
+<h3 id="application-backend-1">Application Backend</h3>
+<h4 id="il-est-possible-de-modifier-ou-supprimer-des-soirées">Il est possible de modifier ou supprimer des soirées</h4>
+<p>En tant qu'administrateur, dans le but de gérer des soirées, je dispose d'une vue &quot;Liste des soirées&quot;, me permettant de visualiser l'ensemble des soirées de l'application.</p>
+<p>En tant qu'administrateur, dans le but de gérer des soirées, je dispose d'un bouton pour chaque soirée, me permettant de le supprimer. Eventuellement, un message d'information m'indique que le soirée a bien été supprimé. Ce message doit apparaître au niveau de la &quot;Liste des soirées&quot;.</p>
+<p>En tant qu'administrateur, dans le but de gérer les soirées, je dispose d'un bouton pour chaque soirée, me permettant de le modifier. Ce bouton m'amène sur une page d'édition du soirée. Je peux :</p>
+<ul>
+<li>annuler mon opération en cliquant sur un bouton &quot;Annuler&quot;, ce qui me ramène à la liste des soirées ;</li>
+<li>sauvegarder les modifications que j'ai apporté au soirée. Une fois ces modifications sauvegardées, je suis ramené à la liste des soirées.</li>
+</ul>
+<p>Eventuellement, un message d'information s'affiche une fois le soirée mis à jour. Ce message doit s'afficher sur la page &quot;Liste des soirées&quot;.</p>
+<h4 id="il-est-possible-de-modifier-ou-supprimer-des-commentaires">Il est possible de modifier ou supprimer des commentaires</h4>
+<p>En tant qu'administrateur, dans le but de gérer les commentaires, je dispose d'une vue &quot;Liste des commentaires&quot;, me permettant de visualiser l'ensemble des commentaires de l'application.</p>
+<p>En tant qu'administrateur, dans le but de gérer les commentaires, je dispose d'un bouton pour chaque commentaire, me permettant de le supprimer. Eventuellement, un message d'information m'indique que le commentaire a bien été supprimé. Ce message doit apparaître au niveau de la &quot;Liste des commentaires&quot;.</p>
+<p>En tant qu'administrateur, dans le but de gérer les commentaires, je dispose d'un bouton pour chaque commentaire, me permettant de le modifier. Ce bouton m'amène sur une page d'édition du commentaire. Je peux :</p>
+<ul>
+<li>annuler mon opération en cliquant sur un bouton &quot;Annuler&quot;, ce qui me ramène à la liste des commentaires ;</li>
+<li>sauvegarder les modifications que j'ai apporté au commentaire. Une fois ces modifications sauvegardées, je suis ramené à la liste des commentaires.</li>
+</ul>
+<p>Eventuellement, un message d'information s'affiche une fois le commentaire mis à jour. Ce message doit s'afficher sur la page &quot;Liste des commentaires&quot;.</p>
+<h4 id="il-est-possible-dutiliser-des-filtres-dans-les-listes">Il est possible d'utiliser des filtres dans les listes</h4>
+<p>En tant qu'administrateur, dans le but de trouver rapidement un commentaire, je dispose de filtres permettant de réduire la &quot;Liste des commentaires&quot;. Un filtre réduit généralement le nombre de résultats.</p>
+<p>La &quot;Liste des commentaires&quot; est potentiellement très longue. Dans le but d'améliorer l'expérience utilisateur, la &quot;Liste des commentaires&quot; pourrait être paginée. La pagination permet de séparer l'ensemble des commentaires en plusieurs pages.</p>
+<p>Ces deux améliorations peuvent être également faites sur la &quot;Liste des soirées&quot; et la &quot;Liste des lieux&quot;.</p>
+<h3 id="application-frontend-1">Application Frontend</h3>
+<h4 id="spam-assassin">SPAM Assassin</h4>
+<p>Dans le but d'éviter le SPAM, les lieux, soirées et commentaires ne sont pas directement publiés sur le site. Ils sont en statut &quot;en attente de modération&quot;. Un administrateur peut, dans l'application <em>Backend</em>, les valider ou les rejeter.</p>
+<h4 id="géolocalisation">Géolocalisation</h4>
+<p>Dans le but d'afficher la position exacte d'un lieu, l'application peut automatiquement géocoder l'adresse saisie par l'utilisateur. Géocoder une adresse signifie récupérer ses coordonnées géographiques (latitude, longitude) via un service web. Grâce à ces coordonnées, il devient possible d'afficher une carte sur la &quot;Page de détail&quot; d'un lieu.</p>
+<h2 id="outils-utiles">Outils Utiles</h2>
+<h3 id="bibliothèques"> Bibliothèques</h3>
+<p>Vous pouvez vous servir de bibliothèques existantes, faites un tour sur <a href="http://packagist.org">Packagist</a>.</p>
+<h3 id="frameworks">Frameworks</h3>
+<p>Vous pouvez réutiliser votre travail réalisé pendant les TPs.</p>
+<p>Vous pouvez égalment en prendre un de la liste, un autre, ou aucun, c'est à vous de choisir !</p>
+<ul>
+<li><a href="http://silex.sensiolabs.org/">Silex</a></li>
+<li><a href="http://www.slimframework.com/">Slim</a></li>
+<li><a href="http://symfony.com/">Symfony2</a></li>
+</ul>
+<h3 id="géolocalisation-1">Géolocalisation</h3>
+<ul>
+<li><a href="http://geocoder-php.org/">Geocoder</a></li>
+</ul>
+<h3 id="design">Design</h3>
+<ul>
+<li><a href="http://twitter.github.com/bootstrap/">Twitter Bootstrap</a></li>
+<li><a href="http://foundation.zurb.com/">Zurb Foundation</a></li>
+<li><a href="http://maxmert.com/">Maxmertkit</a></li>
+</ul>
+</div>
+</body>
+</html>
